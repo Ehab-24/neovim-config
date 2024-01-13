@@ -41,6 +41,8 @@ P.S. You can delete this when you're done too. It's your config now :)
 --  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)}}
 
 vim.cmd [[autocmd BufWritePre * lua vim.lsp.buf.format()]]
+vim.cmd('set guifont=DejaVu\\ Sans\\ Mono:h10') -- this is neovim-qt specific
+vim.cmd('set linespace=1')
 
 -- Install package manager
 --    https://github.com/folke/lazy.nvim
@@ -211,6 +213,31 @@ require('lazy').setup({
   },
 
   {
+    "iamcco/markdown-preview.nvim",
+    cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+    ft = { "markdown" },
+    build = function() vim.fn["mkdp#util#install"]() end,
+  },
+
+  {
+    "christoomey/vim-tmux-navigator",
+    cmd = {
+      "TmuxNavigateLeft",
+      "TmuxNavigateDown",
+      "TmuxNavigateUp",
+      "TmuxNavigateRight",
+      "TmuxNavigatePrevious",
+    },
+    keys = {
+      { "<c-h>",  "<cmd><C-U>TmuxNavigateLeft<cr>" },
+      { "<c-j>",  "<cmd><C-U>TmuxNavigateDown<cr>" },
+      { "<c-k>",  "<cmd><C-U>TmuxNavigateUp<cr>" },
+      { "<c-l>",  "<cmd><C-U>TmuxNavigateRight<cr>" },
+      { "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
+    },
+  },
+
+  {
     -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     dependencies = {
@@ -228,6 +255,69 @@ require('lazy').setup({
     event = "InsertEnter",
     opts = {} -- this is equalent to setup({}) function
   },
+
+  {
+    "folke/noice.nvim",
+    event = "VeryLazy",
+    opts = {
+      -- add any options here
+    },
+    dependencies = {
+      -- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
+      "MunifTanjim/nui.nvim",
+      -- OPTIONAL:
+      --   `nvim-notify` is only needed, if you want to use the notification view.
+      --   If not available, we use `mini` as the fallback
+      "rcarriga/nvim-notify",
+    }
+  },
+
+  {
+    "nvim-neorg/neorg",
+    build = ":Neorg sync-parsers",
+    -- tag = "*",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    config = function()
+      require("neorg").setup {
+        load = {
+          ["core.defaults"] = {}, -- Loads default behaviour
+          ["core.concealer"] = {
+            config = {
+              icons = {
+                todo = {
+                  undone = {
+                    icon = "—"
+                  },
+                  done = {
+                    icon = "✔"
+                  },
+                  cancelled = {
+                    icon = "✘"
+                  },
+                  uncertain = {
+                    icon = "?"
+                  },
+                  on_hold = {
+                    icon = "◉"
+                  },
+                },
+              },
+            },
+          },                  -- Adds pretty icons to your documents
+          ["core.dirman"] = { -- Manages Neorg workspaces
+            config = {
+              workspaces = {
+                notes = "~/notes",
+              },
+              default_workspace = "notes",
+            },
+          },
+        },
+      }
+    end,
+
+  },
+
   -- NOTE: Next Step on Your Neovim Journey: Add/Configure additional "plugins" for kickstart
   --       These are some example plugins that I've included in the kickstart repository.
   --       Uncomment any of the lines below to enable them.
@@ -243,14 +333,19 @@ require('lazy').setup({
   -- { import = 'custom.plugins' },
 }, {})
 
+require('onedark').setup {
+  style = 'warmer'
+}
+require('onedark').load()
+
 -- [[ Setting options ]]
 -- See `:help vim.o`
 -- NOTE: You can change these options as you wish!
 
 -- custom
 vim.g.mapleader = ' '
-vim.g.copilot_assume_mapped = true
 vim.g.maplocalleader = ' '
+vim.g.copilot_assume_mapped = true
 vim.opt.nu = true
 vim.opt.relativenumber = true
 vim.opt.scrolloff = 8
@@ -274,7 +369,7 @@ vim.o.mouse = 'a'
 -- Sync clipboard between OS and Neovim.
 --  Remove this option if you want your OS clipboard to remain independent.
 --  See `:help 'clipboard'`
-vim.o.clipboard = 'unnamedplus'
+-- vim.o.clipboard = 'unnamedplus'
 
 -- Enable break indent
 vim.o.breakindent = true
@@ -306,28 +401,23 @@ vim.o.termguicolors = true
 vim.keymap.set({ 'n', 'v' }, '<Space>', '<Nop>', { silent = true })
 
 -- move current line up and down
-vim.keymap.set('n', '<A-j>', ":m .+1<CR>==")
-vim.keymap.set('n', '<A-k>', ":m .-2<CR>==")
 vim.keymap.set('n', '<A-Up>', ":m .-2<CR>==")
 vim.keymap.set('n', '<A-Down>', ":m .+1<CR>==")
 
 -- move highlighted lines up and down
-vim.keymap.set('v', 'A-J', ":m '>+1<CR>gv=gv")
-vim.keymap.set('v', 'A-K', ":m '<-2<CR>gv=gv")
 vim.keymap.set('v', '<A-Down>', ":m '>+1<CR>gv=gv")
 vim.keymap.set('v', '<A-Up>', ":m '<-2<CR>gv=gv")
 
--- navigate between split windows
+-- navigate between split panes
 vim.keymap.set('n', '<A-h>', '<C-w>h')
 vim.keymap.set('n', '<A-j>', '<C-w>j')
 vim.keymap.set('n', '<A-k>', '<C-w>k')
 vim.keymap.set('n', '<A-l>', '<C-w>l')
 
--- change window width/height
+-- change pane width/height
 vim.keymap.set('n', '<A-Left>', '<C-w><')
 vim.keymap.set('n', '<A-Right>', '<C-w>>')
--- vim.keymap.set('n', '<A-Up>', '<C-w>+')
--- vim.keymap.set('n', '<A-Down>', '<C-w>-')
+
 vim.keymap.set('n', '<A-\\>', '<C-w>|')
 vim.keymap.set('n', '<A-->', '<C-w>_')
 vim.keymap.set('n', '<A-=>', '<C-w>=')
@@ -338,18 +428,22 @@ vim.keymap.set('i', '<C-c>', '<Esc>')
 -- add empty line
 vim.keymap.set('n', '<Enter>', 'o<Esc>')
 
-vim.keymap.set({ 'n', 'i', 'v' }, '<C-h>', '<C-Left>')
-vim.keymap.set({ 'n', 'i', 'v' }, '<C-l>', '<C-Right>')
+-- jump to start/end of line
+vim.keymap.set('n', '#', '^')
 
 -- keeps cursor in the same place when joining lines
 vim.keymap.set('n', 'J', "mzJ`z")
 -- reserve the current buffer while pasting over text
-vim.keymap.set('x', '<leader>p', "\"_dP")
+vim.keymap.set('x', 'p', "\"_dP")
 
 -- [bug: doesn't work] copy into system clipboard
 vim.keymap.set('n', '<leader>y', '\"+y')
 vim.keymap.set('v', '<leader>y', '\"+y')
 vim.keymap.set('n', '<leader>Y', '\"+Y')
+
+-- paste from system clipboard
+vim.keymap.set('n', '<leader>p', '\"+p')
+vim.keymap.set('v', '<leader>p', '\"+p')
 
 -- delete without copying
 vim.keymap.set('n', '<leader>d', '\"_d')
@@ -367,6 +461,9 @@ vim.keymap.set('n', '<leader>j', "<cmd>cprev<CR>zz")
 
 -- jump to previously edited file
 vim.keymap.set('n', '<C-p>', "<C-^>")
+
+-- exit terminal mode
+vim.keymap.set('t', '<C-q>', '<C-\\><C-n>')
 
 -- replace word under cursor in file
 vim.keymap.set('n', '<leader>s', ":%s/\\<<C-r><C-w>\\>//gI<Left><Left><Left>")
@@ -401,13 +498,6 @@ require('telescope').setup {
   },
 }
 
-require 'nvim-treesitter.configs'.setup {
-  autotag = {
-    enable = true,
-  }
-}
-
-
 -- Enable telescope fzf native, if installed
 pcall(require('telescope').load_extension, 'fzf')
 
@@ -437,9 +527,7 @@ vim.keymap.set('n', '<leader>sv', vim.cmd.Ex, { desc = "Open default file tree" 
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup {
     -- Add languages to be installed here that you want installed for treesitter
-    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc',
-      'vim',
-      'bash' },
+    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash' },
 
     -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
     auto_install = false,
@@ -566,7 +654,9 @@ require('which-key').register {
 
 -- mason-lspconfig requires that these setup functions are called in this order
 -- before setting up the servers.
-require('mason').setup()
+require('mason').setup({
+  PATH = "prepend",
+})
 require('mason-lspconfig').setup()
 
 -- Enable the following language servers
