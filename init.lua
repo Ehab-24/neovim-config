@@ -1,4 +1,5 @@
 --[[
+--
 =====================================================================
 ==================== READ THIS BEFORE CONTINUING ====================
 =====================================================================
@@ -161,6 +162,14 @@ require('lazy').setup({
     end,
   },
 
+  -- {
+  --   "EdenEast/nightfox.nvim",
+  --   config = function()
+  --     require('nightfox').load()
+  --     vim.cmd.colorscheme 'carbonfox'
+  --   end
+  -- },
+
   {
     -- Set lualine as statusline
     'nvim-lualine/lualine.nvim',
@@ -318,7 +327,13 @@ require('lazy').setup({
 }, {})
 
 require('onedark').setup {
-  style = 'warmer'
+  style = 'warmer',
+  -- transparent = true,
+  diagnostics = {
+    darker = false,
+    background = false,
+    undercurl = false
+  }
 }
 require('onedark').load()
 
@@ -511,7 +526,7 @@ vim.keymap.set('n', '<leader>sv', vim.cmd.Ex, { desc = "Open default file tree" 
 vim.defer_fn(function()
   require('nvim-treesitter.configs').setup {
     -- Add languages to be installed here that you want installed for treesitter
-    ensure_installed = { 'c', 'cpp', 'go', 'lua', 'python', 'rust', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash' },
+    ensure_installed = { 'c', 'cpp', 'go', 'rust', 'lua', 'python', 'tsx', 'javascript', 'typescript', 'vimdoc', 'vim', 'bash' },
 
     -- Autoinstall languages that are not installed. Defaults to false (but you can change for yourself!)
     auto_install = false,
